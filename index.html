@@ -85,11 +85,11 @@
         // =========================================================================
         // PENTING: Ganti nilai di bawah ini dengan URL dan Kunci dari Supabase Anda!
         // =========================================================================
-        const SUPABASE_URL = 'https://eaijtfzsepmhazaqpsaa.supabase.co/rest/v1/';
+        const SUPABASE_URL = 'https://eaijtfzsepmhazaqpsaa.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhaWp0ZnpzZXBtaGF6YXFwc2FhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NDI3MDMsImV4cCI6MjEwODQxODcwM30.3cm4TDt6ruq7S9SblwcaciPiW8SgCT3mjP_Pig1XbE4';
         
-        // Inisialisasi Supabase Client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Inisialisasi Supabase Client (diubah menjadi supabaseClient untuk mencegah konflik)
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Elemen DOM
         const form = document.getElementById('guestbook-form');
@@ -110,13 +110,16 @@
 
         // Cek apakah user sudah mengganti kunci default
         function checkConfig() {
-            if (SUPABASE_URL.includes('https://eaijtfzsepmhazaqpsaa.supabase.co/rest/v1/') || SUPABASE_ANON_KEY.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhaWp0ZnpzZXBtaGF6YXFwc2FhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NDI3MDMsImV4cCI6MjEwODQxODcwM30.3cm4TDt6ruq7S9SblwcaciPiW8SgCT3mjP_Pig1XbE4')) {
+            // DIPERBAIKI: Logika dikembalikan agar tidak memblokir kunci yang sudah benar
+            if (SUPABASE_URL.includes('GANTI_DENGAN') || SUPABASE_ANON_KEY.includes('GANTI_DENGAN')) {
                 configWarning.classList.remove('hidden');
                 messagesContainer.innerHTML = '<p class="text-center text-red-500 py-4">Database belum dikonfigurasi.</p>';
                 submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 return false;
             }
+            // Sembunyikan kotak peringatan jika konfigurasi sudah benar
+            configWarning.classList.add('hidden');
             return true;
         }
 
@@ -128,7 +131,7 @@
 
             try {
                 // Query ke Supabase: Ambil dari tabel 'guestbook', urutkan berdasarkan waktu (terbaru di atas)
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('guestbook')
                     .select('*')
                     .order('created_at', { ascending: false });
@@ -190,7 +193,7 @@
 
             try {
                 // Insert data ke tabel 'guestbook'
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('guestbook')
                     .insert([
                         { name: nameValue, message: messageValue }
